@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import GlassSurface from './GlassSurface';
+import { useState, useEffect } from 'react';
+import GlassSurfaceSimple from './GlassSurfaceSimple';
 import './EntityConfigSidebar.css';
 
 export default function EntityConfigSidebar({ config, onConfigChange }) {
@@ -12,12 +12,25 @@ export default function EntityConfigSidebar({ config, onConfigChange }) {
     setViewMode(prev => prev === 'pretty' ? 'json' : 'pretty');
   };
 
-  const handleJsonEdit = (e) => {
+  const [jsonText, setJsonText] = useState('');
+  const [jsonError, setJsonError] = useState(null);
+
+  // Sync jsonText when config changes from outside
+  useEffect(() => {
+    setJsonText(JSON.stringify(config, null, 2));
+  }, [config]);
+
+  const handleJsonChange = (e) => {
+    const newText = e.target.value;
+    setJsonText(newText);
+
     try {
-      const newConfig = JSON.parse(e.target.value);
-      onConfigChange(newConfig);
+      const parsed = JSON.parse(newText);
+      setJsonError(null);
+      onConfigChange(parsed);
     } catch (err) {
-      // Invalid JSON, don't update
+      setJsonError(err.message);
+      // Don't update config if invalid
     }
   };
 
@@ -111,13 +124,7 @@ export default function EntityConfigSidebar({ config, onConfigChange }) {
 
   return (
     <div className="entity-config-sidebar">
-      <GlassSurface
-        width="100%"
-        height="100%"
-        borderRadius={16}
-        backgroundOpacity={0.1}
-        className="sidebar-glass"
-      >
+      <GlassSurfaceSimple className="sidebar-glass">
         <div className="sidebar-content">
           <div className="sidebar-header">
             <h2>Entity Config</h2>
@@ -133,10 +140,11 @@ export default function EntityConfigSidebar({ config, onConfigChange }) {
 
           {viewMode === 'json' ? (
             <div className="json-editor-container">
+              {jsonError && <div className="json-error">{jsonError}</div>}
               <textarea
                 className="json-editor"
-                value={JSON.stringify(config, null, 2)}
-                onChange={handleJsonEdit}
+                value={jsonText}
+                onChange={handleJsonChange}
                 spellCheck={false}
               />
             </div>
@@ -257,7 +265,7 @@ export default function EntityConfigSidebar({ config, onConfigChange }) {
             </>
           )}
         </div>
-      </GlassSurface>
+      </GlassSurfaceSimple>
     </div>
   );
 }

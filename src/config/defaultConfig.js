@@ -23,7 +23,7 @@ export const defaultConfig = {
       llm: {
         model: "llama2",
         temperature: 0.3,
-        enabled: true
+        enabled: false
       },
       mcpTools: {
         minecraft_send_message: true,
@@ -32,74 +32,6 @@ export const defaultConfig = {
         minecraft_search_history: true,
         minecraft_get_player_info: true,
         minecraft_get_server_status: true
-      }
-    },
-    {
-      id: "example-npc-001",
-      name: "Shopkeeper Bob",
-      type: "npc",
-      enabled: false,
-      permissions: {
-        canExecuteCommands: true,
-        allowedCommands: ["say", "give", "tell"],
-        deniedCommands: ["op", "deop", "stop", "ban", "kick"],
-        accessLevel: "user"
-      },
-      context: {
-        systemPrompt: "You are a friendly shopkeeper NPC named Bob. You sell basic items and help new players. You're cheerful and always willing to help.",
-        worldState: {
-          canSeeNearbyPlayers: true,
-          canSeeNearbyNPCs: false,
-          canSeeNearbyMobs: true,
-          perceptionRadius: 10
-        }
-      },
-      llm: {
-        model: "llama2",
-        temperature: 0.8,
-        enabled: false
-      },
-      mcpTools: {
-        minecraft_send_message: true,
-        minecraft_run_command: false,
-        minecraft_get_chat_history: true,
-        minecraft_search_history: false,
-        minecraft_get_player_info: true,
-        minecraft_get_server_status: false
-      }
-    },
-    {
-      id: "example-npc-002",
-      name: "Guard Captain",
-      type: "npc",
-      enabled: false,
-      permissions: {
-        canExecuteCommands: true,
-        allowedCommands: ["say", "tell", "teleport"],
-        deniedCommands: ["op", "deop", "stop", "ban", "give"],
-        accessLevel: "mod"
-      },
-      context: {
-        systemPrompt: "You are a stern but fair guard captain NPC. You protect the town and enforce the rules. You're vigilant about suspicious activity.",
-        worldState: {
-          canSeeNearbyPlayers: true,
-          canSeeNearbyNPCs: true,
-          canSeeNearbyMobs: true,
-          perceptionRadius: 20
-        }
-      },
-      llm: {
-        model: "llama2",
-        temperature: 0.6,
-        enabled: false
-      },
-      mcpTools: {
-        minecraft_send_message: true,
-        minecraft_run_command: true,
-        minecraft_get_chat_history: true,
-        minecraft_search_history: true,
-        minecraft_get_player_info: true,
-        minecraft_get_server_status: false
       }
     }
   ],

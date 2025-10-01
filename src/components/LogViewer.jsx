@@ -1,40 +1,30 @@
 import { useState, useRef, useEffect } from 'react';
-import GlassSurface from './GlassSurface';
+import GlassSurfaceSimple from './GlassSurfaceSimple';
+import { api } from '../services/api';
 import './LogViewer.css';
 
 export default function LogViewer() {
-  const [viewMode, setViewMode] = useState('formatted'); // 'formatted' or 'terminal'
-  const [logs, setLogs] = useState([
-    { id: 1, timestamp: new Date().toISOString(), level: 'INFO', message: 'Server started successfully', source: 'Console' },
-    { id: 2, timestamp: new Date().toISOString(), level: 'INFO', message: 'Player joined: Steve', source: 'Player' },
-    { id: 3, timestamp: new Date().toISOString(), level: 'WARN', message: 'Low TPS detected: 15.2', source: 'Monitor' },
-    { id: 4, timestamp: new Date().toISOString(), level: 'INFO', message: 'NPC "Shopkeeper Bob" initialized', source: 'NPC' },
-    { id: 5, timestamp: new Date().toISOString(), level: 'INFO', message: 'Command executed: /give Steve diamond 1', source: 'Console' },
-  ]);
+  const [viewMode, setViewMode] = useState('terminal'); // 'formatted' or 'terminal'
+  const [logs, setLogs] = useState([]);
   const scrollContainerRef = useRef(null);
 
   const handleToggleViewMode = () => {
     setViewMode(prev => prev === 'formatted' ? 'terminal' : 'formatted');
   };
 
-  // Simulate real-time log updates
+  // Fetch logs on mount and poll for updates
   useEffect(() => {
-    const interval = setInterval(() => {
-      const newLog = {
-        id: Date.now(),
-        timestamp: new Date().toISOString(),
-        level: ['INFO', 'WARN', 'ERROR'][Math.floor(Math.random() * 3)],
-        message: [
-          'Player movement detected',
-          'Chunk loaded',
-          'Entity spawned',
-          'Command executed',
-          'Chat message received'
-        ][Math.floor(Math.random() * 5)],
-        source: ['Console', 'Player', 'NPC', 'System'][Math.floor(Math.random() * 4)]
-      };
-      setLogs(prev => [...prev, newLog].slice(-100)); // Keep last 100 logs
-    }, 3000);
+    const fetchLogs = async () => {
+      const data = await api.getLogs();
+      if (data) {
+        setLogs(data);
+      }
+    };
+
+    fetchLogs();
+
+    // Poll every 2 seconds
+    const interval = setInterval(fetchLogs, 2000);
 
     return () => clearInterval(interval);
   }, []);
@@ -55,13 +45,7 @@ export default function LogViewer() {
 
   return (
     <div className="log-viewer">
-      <GlassSurface
-        width="100%"
-        height="100%"
-        borderRadius={16}
-        backgroundOpacity={0.1}
-        className="sidebar-glass"
-      >
+      <GlassSurfaceSimple className="sidebar-glass">
         <div className="sidebar-content">
           <div className="sidebar-header">
             <h2>Server Logs</h2>
@@ -76,10 +60,14 @@ export default function LogViewer() {
           </div>
 
           <div className="log-content" ref={scrollContainerRef}>
-            {viewMode === 'terminal' ? (
+            {logs.length === 0 ? (
+              <div className="log-empty">
+                No logs available. Waiting for server connection...
+              </div>
+            ) : viewMode === 'terminal' ? (
               <div className="terminal-view">
-                {logs.map(log => (
-                  <div key={log.id} className="terminal-line">
+                {logs.map((log, index) => (
+                  <div key={log.id || index} className="terminal-line">
                     <span className="terminal-timestamp">[{formatTimestamp(log.timestamp)}]</span>
                     <span
                       className="terminal-level"
@@ -92,34 +80,32 @@ export default function LogViewer() {
                 ))}
               </div>
             ) : (
-              <div className="infinite-scroll-wrapper">
-                <div className="infinite-scroll-container">
-                  {logs.map((log) => (
-                    <div key={log.id} className="infinite-scroll-item log-card">
-                      <div className="log-card-header">
-                        <span className="log-source">{log.source}</span>
-                        <span className="log-timestamp">{formatTimestamp(log.timestamp)}</span>
-                      </div>
-                      <div className="log-card-body">
-                        <span
-                          className="log-level"
-                          style={{
-                            backgroundColor: getLevelColor(log.level) + '33',
-                            color: getLevelColor(log.level)
-                          }}
-                        >
-                          {log.level}
-                        </span>
-                        <span className="log-message">{log.message}</span>
-                      </div>
+              <div className="formatted-logs">
+                {logs.map((log, index) => (
+                  <div key={log.id || index} className="log-card">
+                    <div className="log-card-header">
+                      <span className="log-source">{log.source || 'System'}</span>
+                      <span className="log-timestamp">{formatTimestamp(log.timestamp)}</span>
                     </div>
-                  ))}
-                </div>
+                    <div className="log-card-body">
+                      <span
+                        className="log-level"
+                        style={{
+                          backgroundColor: getLevelColor(log.level) + '33',
+                          color: getLevelColor(log.level)
+                        }}
+                      >
+                        {log.level}
+                      </span>
+                      <span className="log-message">{log.message}</span>
+                    </div>
+                  </div>
+                ))}
               </div>
             )}
           </div>
         </div>
-      </GlassSurface>
+      </GlassSurfaceSimple>
     </div>
   );
 }
