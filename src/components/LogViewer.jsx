@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import GlassSurfaceSimple from './GlassSurfaceSimple';
+import InfiniteScroll from './InfiniteScroll';
 import { api } from '../services/api';
 import './LogViewer.css';
 
@@ -43,6 +44,30 @@ export default function LogViewer() {
     }
   };
 
+  // Format logs for InfiniteScroll
+  const formattedLogItems = logs.map((log, index) => ({
+    content: (
+      <div className="log-card-content">
+        <div className="log-card-header">
+          <span className="log-source">{log.source || 'System'}</span>
+          <span className="log-timestamp">{formatTimestamp(log.timestamp)}</span>
+        </div>
+        <div className="log-card-body">
+          <span
+            className="log-level"
+            style={{
+              backgroundColor: getLevelColor(log.level) + '33',
+              color: getLevelColor(log.level)
+            }}
+          >
+            {log.level}
+          </span>
+          <span className="log-message">{log.message}</span>
+        </div>
+      </div>
+    )
+  }));
+
   return (
     <div className="log-viewer">
       <GlassSurfaceSimple className="sidebar-glass">
@@ -80,28 +105,15 @@ export default function LogViewer() {
                 ))}
               </div>
             ) : (
-              <div className="formatted-logs">
-                {logs.map((log, index) => (
-                  <div key={log.id || index} className="log-card">
-                    <div className="log-card-header">
-                      <span className="log-source">{log.source || 'System'}</span>
-                      <span className="log-timestamp">{formatTimestamp(log.timestamp)}</span>
-                    </div>
-                    <div className="log-card-body">
-                      <span
-                        className="log-level"
-                        style={{
-                          backgroundColor: getLevelColor(log.level) + '33',
-                          color: getLevelColor(log.level)
-                        }}
-                      >
-                        {log.level}
-                      </span>
-                      <span className="log-message">{log.message}</span>
-                    </div>
-                  </div>
-                ))}
-              </div>
+              <InfiniteScroll
+                items={formattedLogItems}
+                width="100%"
+                maxHeight="100%"
+                itemMinHeight={100}
+                negativeMargin="0.5rem"
+                autoplay={false}
+                pauseOnHover={true}
+              />
             )}
           </div>
         </div>
