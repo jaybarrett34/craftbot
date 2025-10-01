@@ -1,0 +1,6 @@
+/* Minecraft font from Google Fonts CDN */
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+
+.minecraft-font {
+  font-family: 'Press Start 2P', cursive;
+}
