@@ -1,7 +1,7 @@
 .entity-config-sidebar {
   position: sticky;
   top: 2rem;
-  width: 400px;
+  width: 100%;
   max-height: calc(100vh - 4rem);
   overflow: hidden;
 }

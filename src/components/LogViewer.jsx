@@ -111,6 +111,8 @@ export default function LogViewer() {
                 maxHeight="100%"
                 itemMinHeight={100}
                 negativeMargin="0.5rem"
+                isTilted={true}
+                tiltDirection="right"
                 autoplay={false}
                 pauseOnHover={true}
               />
