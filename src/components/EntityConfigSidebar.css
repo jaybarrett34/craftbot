@@ -1,7 +1,6 @@
 .entity-config-sidebar {
   position: sticky;
   top: 2rem;
-  width: 100%;
   max-height: calc(100vh - 4rem);
   overflow: hidden;
 }
@@ -246,4 +245,32 @@
 
 .checkbox-label input[type="checkbox"] {
   cursor: pointer;
+}
+
+.checkbox-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.help-text {
+  display: block;
+  margin-top: 0.25rem;
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 0.8rem;
+  font-style: italic;
+}
+
+.form-group input[type="range"] {
+  width: calc(100% - 80px);
+  margin-right: 0.5rem;
+}
+
+.range-value {
+  display: inline-block;
+  min-width: 70px;
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 0.9rem;
+  font-weight: 500;
 }

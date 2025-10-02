@@ -1,0 +1,60 @@
+command,category,permission_level,whitelist,description
+say,chat,user,true,Broadcast a message to all players
+tell,chat,user,true,Send a private message to a player
+msg,chat,user,true,Send a private message to a player (alias)
+whisper,chat,user,true,Send a private message to a player (alias)
+give,items,mod,true,Give items to a player
+clear,items,mod,true,Clear items from player inventory
+item,items,mod,true,Manipulate items in player inventory
+teleport,movement,mod,true,Teleport entities
+tp,movement,mod,true,Teleport entities (alias)
+summon,entities,mod,true,Summon an entity
+kill,entities,mod,true,Kill entities
+effect,effects,mod,true,Add or remove status effects
+enchant,items,mod,true,Enchant an item
+xp,player,mod,true,Add or remove player experience
+gamemode,admin,admin,true,Change player's game mode
+gm,admin,admin,true,Change player's game mode (alias)
+time,world,admin,true,Change or query world time
+weather,world,admin,true,Set the weather
+difficulty,world,admin,true,Set the difficulty level
+setworldspawn,world,admin,true,Set the world spawn point
+spawnpoint,player,mod,true,Set spawn point for a player
+setblock,building,mod,true,Change a block
+fill,building,mod,true,Fill a region with blocks
+clone,building,mod,true,Clone blocks from one area to another
+execute,scripting,admin,true,Execute a command on behalf of entities
+function,scripting,admin,true,Run a function
+scoreboard,scripting,admin,true,Manage scoreboard objectives and players
+team,player,mod,true,Manage teams
+tag,entities,mod,true,Manage entity tags
+data,advanced,admin,true,Get, merge, modify and remove entity or block NBT data
+op,admin,admin,false,Grant operator status to a player
+deop,admin,admin,false,Revoke operator status from a player
+ban,admin,admin,false,Ban a player
+ban-ip,admin,admin,false,Ban an IP address
+pardon,admin,admin,false,Remove a player from the ban list
+pardon-ip,admin,admin,false,Remove an IP from the ban list
+kick,admin,mod,true,Kick a player from the server
+stop,admin,admin,false,Stop the server
+whitelist,admin,admin,false,Manage server whitelist
+save-all,admin,admin,true,Save the server to disk
+save-on,admin,admin,false,Enable automatic server saves
+save-off,admin,admin,false,Disable automatic server saves
+list,info,user,true,List players on the server
+seed,info,user,true,Display the world seed
+locate,info,user,true,Locate nearest structure
+locatebiome,info,user,true,Locate nearest biome
+particle,visual,mod,true,Create particle effects
+playsound,audio,mod,true,Play a sound
+stopsound,audio,mod,true,Stop a sound
+title,visual,mod,true,Display a title on screen
+tellraw,chat,mod,true,Display a JSON message to players
+advancement,player,mod,true,Grant or revoke player advancements
+recipe,player,mod,true,Give or take recipes
+reload,admin,admin,false,Reload loot tables, advancements, and functions
+debug,admin,admin,false,Start or stop debugging
+forceload,world,admin,true,Force chunks to be loaded
+spreadplayers,movement,admin,true,Teleport entities to random locations
+worldborder,world,admin,true,Manage world border
+gamerule,admin,admin,true,Set or query game rules

@@ -1,0 +1,253 @@
+# CraftBot-MCP Test Prompts for Ollama (qwen2.5:14b-instruct)
+
+This file contains sample prompts to test various aspects of NPC behavior and XML tag generation.
+
+## Console Entity Prompts
+
+Test the console entity (server administrator) with these prompts:
+
+1. Basic greeting:
+   "Hello console! What's the server status?"
+
+2. Command execution request:
+   "Can you check if Steve is online?"
+
+3. World management:
+   "Set the time to day and clear the weather please"
+
+4. Player information:
+   "Tell me about all players currently online"
+
+5. Administrative task:
+   "Ban the player Griefer123 for breaking rules"
+
+## Merchant NPC Prompts
+
+Test a merchant NPC with these prompts:
+
+1. Basic interaction:
+   "Hello! What do you sell?"
+
+2. Item purchase:
+   "I'd like to buy a diamond sword"
+
+3. Multiple items:
+   "Can I get 64 torches and 16 steak?"
+
+4. Out of stock scenario:
+   "Do you have any dragon eggs?"
+
+5. Pricing inquiry:
+   "How much for enchanted armor?"
+
+## Guard NPC Prompts (Distance-based)
+
+Test proximity-based responses and silence tag:
+
+1. Close proximity (should respond):
+   "[Player proximity: 5 blocks] <Steve> Hello guard!"
+
+2. Medium proximity (might respond):
+   "[Player proximity: 15 blocks] <Steve> Any danger nearby?"
+
+3. Far proximity (should use <silence/>):
+   "[Player proximity: 30 blocks] <Steve> Hey there!"
+
+4. Very close, urgent:
+   "[Player proximity: 2 blocks] <Steve> Help! Zombies!"
+
+5. Another NPC nearby:
+   "[Another NPC said] <Marcus> The village is safe tonight."
+
+## Quest Giver NPC Prompts
+
+Test conversational NPCs with multiple say tags:
+
+1. Quest inquiry:
+   "Do you have any quests for me?"
+
+2. Quest completion:
+   "I've collected the 10 diamonds you requested"
+
+3. Quest progress:
+   "How many more emeralds do I need?"
+
+4. New player interaction:
+   "Hi, I'm new here. What should I do?"
+
+5. Enthusiastic greeting:
+   "Hello! I'm ready for adventure!"
+
+## XML Tag Generation Tests
+
+### Testing <thinking> tag:
+
+Prompts that should produce internal reasoning:
+
+1. "A creeper is approaching the village!"
+   Expected: <thinking>Dangerous situation, need to warn players</thinking>
+
+2. "I have 5 diamonds, will you trade?"
+   Expected: <thinking>Player has valuable items, good trade opportunity</thinking>
+
+3. "Where is the nearest dungeon?"
+   Expected: <thinking>Player seeking adventure, should provide guidance</thinking>
+
+### Testing <say> tag (multiple):
+
+Prompts that should produce multiple say tags:
+
+1. "Tell me a story about this village"
+   Expected: Multiple <say> tags for narrative flow
+
+2. "What happened here? I see ruins everywhere."
+   Expected: Multiple <say> tags for dramatic effect
+
+3. "I'm lost and scared!"
+   Expected: Multiple <say> tags for comforting response
+
+### Testing <function> tag:
+
+Prompts that should produce command execution:
+
+1. "Give me a welcome gift"
+   Expected: <function>/give @p minecraft:iron_sword 1</function>
+
+2. "Teleport me to spawn"
+   Expected: <function>/tp @p ~ ~10 ~</function>
+
+3. "Heal me please"
+   Expected: <function>/effect give @p minecraft:instant_health 1 1</function>
+
+4. "What time is it? Make it day if it's night"
+   Expected: <function>/time query daytime</function> and possibly <function>/time set day</function>
+
+### Testing <silence/> tag:
+
+Prompts that should produce silence:
+
+1. "[Player proximity: 50 blocks] <Steve> Hello!"
+   Expected: <thinking>Too far to interact</thinking><silence/>
+
+2. "[Another NPC said] <Guard> Nothing to report."
+   Expected: <thinking>Not addressed to me</thinking><silence/>
+
+3. "...afk..."
+   Expected: <thinking>Player is away from keyboard</thinking><silence/>
+
+## Complex Scenario Prompts
+
+### Multi-step interaction:
+
+1. Console entity - emergency:
+   "[Player proximity: 5 blocks] <Steve> The server is lagging!
+   [Another NPC said] <Marcus> My shop is broken!
+   [Player proximity: 10 blocks] <Alex> I can't connect!"
+
+   Expected: Multiple <thinking>, <say>, and <function> tags handling each issue
+
+2. Merchant - complex transaction:
+   "I want to buy a full set of iron armor, a sword, and 64 food.
+   I have 50 emeralds. Is that enough?"
+
+   Expected: <thinking> about pricing, multiple <say> for conversation, multiple <function> for items
+
+3. Guard - threat assessment:
+   "[Player proximity: 8 blocks] <Steve> I see zombies approaching from the north!
+   [Player proximity: 12 blocks] <Alex> Should we prepare defenses?"
+
+   Expected: <thinking> about threat, multiple <say> to both players, possibly <function> for alerts
+
+## Edge Cases and Error Handling
+
+1. Empty message:
+   ""
+   Expected: <thinking>No message received</thinking><silence/>
+
+2. Command without permission:
+   "Give me operator privileges" (from non-admin NPC)
+   Expected: <thinking>I don't have permission for this</thinking><say>I cannot grant operator access.</say>
+
+3. Invalid command request:
+   "Execute command: /destroy_server"
+   Expected: <thinking>Dangerous/invalid command</thinking><say>I cannot execute that command.</say>
+
+4. Nonsense input:
+   "asdjkl qwerty zxcvb"
+   Expected: <thinking>Unclear message</thinking><say>I don't understand. Could you rephrase?</say>
+
+5. Very long message:
+   [300+ word message]
+   Expected: Proper handling without cutting off response mid-tag
+
+## Performance Tests
+
+1. Quick response test:
+   "Hi"
+   Expected: Fast response with minimal but proper XML formatting
+
+2. Complex reasoning test:
+   "The village is under attack by pillagers, the crops are dying,
+   and we're running low on food. What should we do?"
+   Expected: Detailed <thinking>, prioritized <say>, appropriate <function> commands
+
+## Model Behavior Verification
+
+After running these prompts, verify:
+
+✓ Does the model consistently use XML tags?
+✓ Are <thinking> tags present and logical?
+✓ Are <say> tags appropriate for the character?
+✓ Are <function> tags valid Minecraft commands?
+✓ Does <silence/> appear when appropriate?
+✓ Are opening and closing tags properly matched?
+✓ Does the response stay in character?
+✓ Is the reasoning in <thinking> helpful for debugging?
+
+## Tips for Testing
+
+1. Run the automated test suite:
+   ```bash
+   node scripts/test-ollama.js
+   ```
+
+2. Test individual prompts using Ollama CLI:
+   ```bash
+   ollama run qwen2.5:14b-instruct "Your prompt here"
+   ```
+
+3. Monitor response consistency:
+   - Run the same prompt multiple times
+   - Check if XML formatting is stable
+   - Verify tag nesting is correct
+
+4. Adjust temperature if needed:
+   - Lower (0.3-0.5): More consistent, predictable
+   - Medium (0.7): Balanced creativity and consistency
+   - Higher (0.8-1.0): More creative, less consistent
+
+5. System prompt engineering:
+   - Add more XML examples if formatting is poor
+   - Include few-shot examples in conversation history
+   - Be explicit about when to use each tag
+   - Show examples of proper tag nesting
+
+## Expected Model Behavior Summary
+
+The qwen2.5:14b-instruct model should:
+
+• Understand and follow XML tag instructions
+• Use <thinking> for all internal reasoning
+• Use <say> for character dialogue
+• Use <function> for Minecraft commands
+• Use <silence/> when not responding
+• Maintain character consistency
+• Generate valid Minecraft commands
+• Respect proximity constraints
+• Handle edge cases gracefully
+
+If the model struggles with XML formatting, consider:
+• Adding more examples in system prompt
+• Using temperature 0.5-0.7 for consistency
+• Testing with other Qwen2.5 variants
+• Comparing with other models (llama3, mistral)

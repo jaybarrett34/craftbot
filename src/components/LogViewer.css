@@ -1,7 +1,6 @@
 .log-viewer {
   position: sticky;
   top: 2rem;
-  width: 100%;
   max-height: calc(100vh - 4rem);
   overflow: hidden;
 }
@@ -52,8 +51,8 @@
 .log-card-content {
   width: 100%;
   height: 100%;
-  padding: 0.75rem;
-  border-radius: 12px;
+  padding: 0.4rem 0.6rem;
+  border-radius: 8px;
   border: 1px solid rgba(255, 255, 255, 0.2);
   background: rgba(0, 0, 0, 0.3);
   backdrop-filter: blur(8px);
@@ -68,8 +67,8 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 0.5rem;
-  font-size: 0.8rem;
+  margin-bottom: 0.3rem;
+  font-size: 0.65rem;
 }
 
 .log-source {
@@ -85,13 +84,13 @@
 .log-card-body {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
+  gap: 0.5rem;
 }
 
 .log-level {
-  padding: 0.2rem 0.5rem;
-  border-radius: 4px;
-  font-size: 0.75rem;
+  padding: 0.15rem 0.4rem;
+  border-radius: 3px;
+  font-size: 0.6rem;
   font-weight: bold;
   text-transform: uppercase;
 }
@@ -99,6 +98,7 @@
 .log-message {
   color: #fff;
   flex: 1;
+  font-size: 0.75rem;
   word-wrap: break-word;
   overflow-wrap: break-word;
   white-space: normal;

@@ -1,0 +1,3 @@
+# Minecraft EULA - Automatically accepted by setup script
+# Wed Oct  1 15:48:11 EDT 2025
+eula=true

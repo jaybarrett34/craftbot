@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import GlassSurfaceSimple from './GlassSurfaceSimple';
 import InfiniteScroll from './InfiniteScroll';
-import { api } from '../services/api';
+import { api, wsManager } from '../services/api';
 import './LogViewer.css';
 
 export default function LogViewer() {
@@ -13,21 +13,34 @@ export default function LogViewer() {
     setViewMode(prev => prev === 'formatted' ? 'terminal' : 'formatted');
   };
 
-  // Fetch logs on mount and poll for updates
+  // Fetch initial logs and subscribe to WebSocket updates
   useEffect(() => {
-    const fetchLogs = async () => {
+    const fetchInitialLogs = async () => {
       const data = await api.getLogs();
       if (data) {
-        setLogs(data);
+        // Sort logs by timestamp descending (newest first)
+        const sortedLogs = [...data].sort((a, b) =>
+          new Date(b.timestamp) - new Date(a.timestamp)
+        );
+        setLogs(sortedLogs);
       }
     };
 
-    fetchLogs();
+    fetchInitialLogs();
 
-    // Poll every 2 seconds
-    const interval = setInterval(fetchLogs, 2000);
+    // Subscribe to real-time log updates via WebSocket
+    const unsubscribe = wsManager.subscribe('log', (newLog) => {
+      setLogs(prevLogs => {
+        // Add new log to the beginning (newest first)
+        const updatedLogs = [newLog, ...prevLogs];
+        // Keep only the last 500 logs to prevent memory issues
+        return updatedLogs.slice(0, 500);
+      });
+    });
 
-    return () => clearInterval(interval);
+    return () => {
+      unsubscribe();
+    };
   }, []);
 
   const formatTimestamp = (timestamp) => {
@@ -109,8 +122,8 @@ export default function LogViewer() {
                 items={formattedLogItems}
                 width="100%"
                 maxHeight="100%"
-                itemMinHeight={100}
-                negativeMargin="0.5rem"
+                itemMinHeight={60}
+                negativeMargin="0.3rem"
                 isTilted={true}
                 tiltDirection="right"
                 autoplay={false}

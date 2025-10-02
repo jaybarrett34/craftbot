@@ -1,13 +1,45 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import LiquidEther from '../components/LiquidEther';
 import GlitchText from '../components/GlitchText';
 import EntityConfigSidebar from '../components/EntityConfigSidebar';
 import LogViewer from '../components/LogViewer';
+import ConnectionStatus from '../components/ConnectionStatus';
+import MobSpawner from '../components/MobSpawner';
+import ModelDiagnostics from '../components/ModelDiagnostics';
+import PlayerList from '../components/PlayerList';
 import { defaultConfig } from '../config/defaultConfig';
+import { api, wsManager } from '../services/api';
 import './Config.css';
 
 export default function Config() {
   const [config, setConfig] = useState(defaultConfig);
+
+  // Fetch entities from backend on mount
+  useEffect(() => {
+    const fetchEntities = async () => {
+      const entities = await api.getEntities();
+      if (entities && entities.length > 0) {
+        setConfig(prevConfig => ({
+          ...prevConfig,
+          entities
+        }));
+      }
+    };
+
+    fetchEntities();
+
+    // Subscribe to WebSocket updates for entities
+    const unsubscribe = wsManager.subscribe('entities', (entities) => {
+      setConfig(prevConfig => ({
+        ...prevConfig,
+        entities
+      }));
+    });
+
+    return () => {
+      unsubscribe();
+    };
+  }, []);
 
   return (
     <div className="config-page">
@@ -31,6 +63,8 @@ export default function Config() {
         />
       </div>
 
+      <ConnectionStatus />
+
       <div className="config-content">
         <div className="config-header">
           <GlitchText
@@ -46,7 +80,11 @@ export default function Config() {
         <div className="config-main">
           <EntityConfigSidebar config={config} onConfigChange={setConfig} />
           <div className="config-center">
-            {/* Future expansion area */}
+            <div className="config-center-content">
+              <PlayerList />
+              <MobSpawner />
+              <ModelDiagnostics />
+            </div>
           </div>
           <LogViewer />
         </div>

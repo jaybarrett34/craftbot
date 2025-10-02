@@ -6,24 +6,38 @@ export const defaultConfig = {
       type: "console",
       enabled: true,
       permissions: {
-        canExecuteCommands: true,
-        allowedCommands: ["*"], // All commands
-        deniedCommands: [],
-        accessLevel: "admin"
+        level: "admin", // admin, mod, environment, readonly
+        whitelistedCommands: ["*"],
+        blacklistedCommands: [],
+        canExecuteCommands: true
       },
-      context: {
-        systemPrompt: "You are the Minecraft server console with full administrative access. You can execute any command and monitor all server activity.",
-        worldState: {
-          canSeeNearbyPlayers: true,
-          canSeeNearbyNPCs: true,
-          canSeeNearbyMobs: true,
-          perceptionRadius: -1 // Unlimited
+      knowledge: {
+        canAccessPlayerState: ["health", "position", "inventory", "gamemode"],
+        canAccessWorldState: ["time", "weather", "entities"],
+        proximityRequired: false, // console hears everything
+        maxProximity: null,
+        chatFilters: {
+          respondToPlayers: true,      // Respond to player messages
+          respondToAI: false,           // Respond to other AI entities
+          requiresMention: false,       // Only respond if entity name mentioned
+          proximityRequired: false,     // Already exists at parent level, kept for backward compatibility
+          maxProximity: null            // Already exists at parent level, kept for backward compatibility
         }
       },
+      personality: {
+        characterContext: `You are the Minecraft server console with full administrative access. You can execute any command and monitor all server activity.`,
+        conversationHistoryLimit: 50,
+        useSummarization: true
+      },
       llm: {
-        model: "llama2",
-        temperature: 0.3,
-        enabled: false
+        model: "qwen2.5:14b-instruct",
+        enabled: true,
+        temperature: 0.7
+      },
+      appearance: {
+        spawnCommand: null, // console doesn't spawn
+        chatBubble: false,
+        usesServerChat: true
       },
       mcpTools: {
         minecraft_send_message: true,
@@ -51,7 +65,7 @@ export const defaultConfig = {
   },
   ollama: {
     baseUrl: "http://localhost:11434",
-    defaultModel: "llama2",
+    defaultModel: "qwen2.5:14b-instruct",
     timeout: 30000
   },
   logging: {
@@ -62,7 +76,46 @@ export const defaultConfig = {
 };
 
 export const entityTypes = ["console", "npc", "player"];
-export const accessLevels = ["readonly", "user", "mod", "admin"];
+
+export const permissionLevels = [
+  {
+    value: "readonly",
+    label: "Read Only",
+    description: "Can only observe and read information. Cannot execute any commands."
+  },
+  {
+    value: "environment",
+    label: "Environment",
+    description: "Can execute non-destructive environment commands (time, weather, etc.)."
+  },
+  {
+    value: "mod",
+    label: "Moderator",
+    description: "Can execute player management commands (kick, ban, teleport)."
+  },
+  {
+    value: "admin",
+    label: "Admin",
+    description: "Full access to all commands and server operations."
+  }
+];
+
+export const playerStateFields = [
+  { value: "health", label: "Health" },
+  { value: "position", label: "Position" },
+  { value: "inventory", label: "Inventory" },
+  { value: "gamemode", label: "Game Mode" },
+  { value: "effects", label: "Status Effects" },
+  { value: "experience", label: "Experience" }
+];
+
+export const worldStateFields = [
+  { value: "time", label: "World Time" },
+  { value: "weather", label: "Weather" },
+  { value: "entities", label: "Nearby Entities" },
+  { value: "blocks", label: "Nearby Blocks" },
+  { value: "biome", label: "Biome" }
+];
 
 export const availableMCPTools = [
   {

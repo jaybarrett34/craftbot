@@ -1,0 +1,64 @@
+command_name,syntax,requires_execute_context,typical_permission_level,category,description,example_usage
+advancement,advancement (grant|revoke) <targets> (everything|only|from|through|until) [advancement] [criterion],false,admin,player_modify,Gives or takes an advancement or criterion from players,advancement grant @a only minecraft:story/mine_stone
+attribute,attribute <target> <attribute> (base|get|modifier),false,admin,entity_modify,Gets or modifies entity attributes like speed or health,attribute @s minecraft:generic.max_health base set 40
+bossbar,bossbar (add|get|list|remove|set) <id> [options],false,admin,ui,Creates and manages custom boss bars on screen,bossbar add custom_bar {"text":"Quest Progress"}
+clear,clear [targets] [item] [maxCount],false,mob,inventory_modify,Clears items from player inventory,clear @p minecraft:dirt 64
+clone,clone <begin> <end> <destination> [maskMode] [cloneMode],false,admin,world_modify,Copies blocks from one area to another,clone 100 64 100 110 74 110 200 64 200
+data,data (get|merge|modify|remove) (block|entity|storage) <target> [path] [value],false,admin,data_query,Gets or modifies NBT data of blocks/entities/storage,data get entity @p Inventory
+effect,effect (give|clear) <targets> [effect] [seconds] [amplifier] [hideParticles],false,mob,player_modify,Gives or removes status effects from entities,effect give @a minecraft:speed 60 2 true
+enchant,enchant <targets> <enchantment> [level],false,mob,player_modify,Adds enchantment to held item,enchant @p minecraft:sharpness 5
+execute,execute (as|at|if|unless|store|run|positioned|rotated|facing|in|anchored|align) [...],true,admin,execution_context,Executes commands with modified context and conditions,execute as @a at @s if entity @e[type=zombie,distance=..5] run say Zombie nearby!
+fill,fill <from> <to> <block> [mode],false,admin,world_modify,Fills a region with a specific block,fill ~-5 ~-1 ~-5 ~5 ~-1 ~5 minecraft:glass replace air
+function,function <name>,false,admin,execution,Runs all commands in a function file,function mypack:init
+gamemode,gamemode <mode> [target],false,admin,player_modify,Changes player's game mode (survival/creative/adventure/spectator),gamemode creative @p
+give,give <targets> <item> [count],false,mob,inventory_modify,Gives items to players,give @a minecraft:diamond_sword{Enchantments:[{id:"sharpness",lvl:5}]} 1
+kill,kill [targets],false,mob,entity_modify,Kills entities or players,kill @e[type=zombie,distance=..10]
+locate,locate (structure|biome|poi) <id>,false,mob,world_query,Finds nearest structure/biome/point of interest,locate structure minecraft:village
+msg,msg <targets> <message>,false,readonly,chat,Sends private message to specific players,msg @p Hello! This is a private message.
+particle,particle <name> [pos] [delta] [speed] [count] [mode] [viewers],false,admin,visual_effect,Creates particle effects at location,particle minecraft:heart ~ ~2 ~ 0.5 0.5 0.5 0 10
+playsound,playsound <sound> <source> <targets> [pos] [volume] [pitch] [minVolume],false,mob,audio,Plays a sound for specified players,playsound minecraft:entity.experience_orb.pickup master @a ~ ~ ~ 1 1
+say,say <message>,false,mob,chat,Broadcasts message to all players,say Server will restart in 5 minutes!
+scoreboard,scoreboard (objectives|players|teams) (add|remove|list|set|get|operation|modify) [...],false,admin,data_management,Manages scoreboard objectives and player scores,scoreboard objectives add health dummy {"text":"Health"}
+setblock,setblock <pos> <block> [mode],false,admin,world_modify,Places a block at specific coordinates,setblock ~ ~-1 ~ minecraft:diamond_block
+spawnpoint,spawnpoint [targets] [pos] [angle],false,admin,player_modify,Sets spawn point for player,spawnpoint @a 100 64 100
+setworldspawn,setworldspawn [pos] [angle],false,admin,world_modify,Sets world spawn point,setworldspawn 0 64 0
+summon,summon <entity> [pos] [nbt],false,mob,entity_spawn,Summons an entity at location,summon minecraft:armor_stand ~ ~ ~ {CustomName:'{"text":"NPC"}',NoGravity:1b}
+tag,tag <targets> (add|remove|list) [name],false,mob,entity_modify,Adds/removes tags from entities,tag @e[type=villager,distance=..5] add quest_giver
+team,team (add|empty|join|leave|list|modify|remove) [...],false,admin,player_management,Manages teams for multiplayer,team add red_team {"text":"Red Team"}
+tell,tell <targets> <message>,false,readonly,chat,Sends private message (alias for msg),tell @p You found a secret!
+tellraw,tellraw <targets> <message>,false,mob,chat,Sends formatted JSON message to players,tellraw @a {"text":"Welcome!","color":"gold","bold":true}
+teleport,teleport <destination>|<targets> [location] [rotation],false,mob,entity_modify,Teleports entities to location,teleport @p 100 64 100
+time,time (set|add|query) <value>,false,admin,world_modify,Changes or queries world time,time set day
+title,title <targets> (clear|reset|title|subtitle|actionbar|times) [text],false,mob,ui,Displays title/subtitle/actionbar text to players,title @a title {"text":"Welcome to the Server","color":"gold"}
+tp,tp <destination>|<targets> [location] [rotation],false,mob,entity_modify,Teleports entities (shorthand for teleport),tp @s ~ ~10 ~
+weather,weather (clear|rain|thunder) [duration],false,admin,world_modify,Changes weather,weather clear 1000
+whisper,whisper <targets> <message>,false,readonly,chat,Sends private message (alias for msg/tell),whisper @p Secret info here
+worldborder,worldborder (add|center|damage|get|set|warning) [...],false,admin,world_modify,Manages world border,worldborder set 1000
+xp,xp (add|set|query) <targets> <amount> [points|levels],false,admin,player_modify,Adds/sets/queries player experience,xp add @p 100 points
+item,item (replace|modify) (block|entity) <target> <slot> [item|modifier],false,admin,inventory_modify,Replaces or modifies items in inventories,item replace entity @p weapon.mainhand with minecraft:diamond_sword
+forceload,forceload (add|remove|query) [from] [to],false,admin,world_modify,Forces chunks to be loaded constantly,forceload add ~ ~ ~15 ~15
+spreadplayers,spreadplayers <center> <spreadDistance> <maxRange> <respectTeams> <targets>,false,admin,entity_modify,Spreads entities around a location,spreadplayers ~ ~ 10 50 false @a
+spectate,spectate [target] [player],false,admin,player_modify,Makes player spectate another entity,spectate @e[type=villager,limit=1] @p
+schedule,schedule (function|clear) <function> <time> [append|replace],false,admin,execution,Schedules function to run at specific time,schedule function mypack:delayed 100t
+recipe,recipe (give|take) <targets> <recipe|*>,false,admin,player_modify,Unlocks or locks recipes for players,recipe give @a *
+reload,reload,false,admin,server_management,Reloads loot tables and advancements,reload
+seed,seed,false,admin,world_query,Displays world seed,seed
+experience,experience (add|set|query) <targets> <amount> [points|levels],false,admin,player_modify,Modifies player experience (alias for xp),experience add @a 1000 points
+gamerule,gamerule <rule> [value],false,admin,world_modify,Sets or queries game rules,gamerule keepInventory true
+difficulty,difficulty <level>,false,admin,world_modify,Sets game difficulty,difficulty hard
+defaultgamemode,defaultgamemode <mode>,false,admin,world_modify,Sets default game mode for new players,defaultgamemode survival
+ban,ban <targets> [reason],false,admin,server_management,Bans a player,ban BadPlayer griefing
+kick,kick <targets> [reason],false,admin,server_management,Kicks a player from server,kick @a[name=Troublemaker] Time to go
+op,op <targets>,false,admin,server_management,Grants operator status,op TrustedPlayer
+deop,deop <targets>,false,admin,server_management,Removes operator status,deop FormerAdmin
+whitelist,whitelist (on|off|add|remove|list|reload),false,admin,server_management,Manages server whitelist,whitelist add NewPlayer
+stop,stop,false,admin,server_management,Stops the server,stop
+save-all,save-all [flush],false,admin,server_management,Saves server to disk,save-all flush
+save-on,save-on,false,admin,server_management,Enables automatic saving,save-on
+save-off,save-off,false,admin,server_management,Disables automatic saving,save-off
+list,list [uuids],false,readonly,player_query,Lists players on server,list
+publish,publish [port],false,admin,server_management,Opens world to LAN,publish 25565
+debug,debug (start|stop|function),false,admin,debugging,Starts or stops debugging session,debug start
+help,help [command],false,readonly,information,Shows help for commands,help give
+trigger,trigger <objective> [add|set] [value],false,readonly,interaction,Triggers scoreboard objective (player-usable),trigger talk_to_npc
+me,me <action>,false,readonly,chat,Displays action message in chat,me waves hello
