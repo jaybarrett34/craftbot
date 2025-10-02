@@ -28,7 +28,11 @@ Craftbot MCP (Minecraft Control Protocol) enables intelligent, AI-driven NPCs in
 - **Ollama** with qwen2.5:14b-instruct model
 - **Minecraft Java Edition 1.20.1+**
 
-### Installation (3 Steps)
+### Installation
+
+**For detailed platform-specific instructions, see [INSTALLATION.md](INSTALLATION.md)**
+
+Quick install (macOS/Linux):
 
 ```bash
 # 1. Install dependencies
@@ -40,6 +44,8 @@ npm install
 # 3. Setup Ollama and pull model
 ./scripts/setup-ollama.sh
 ```
+
+**Windows users:** See [INSTALLATION.md](INSTALLATION.md#windows-installation) for PowerShell instructions.
 
 ### Configuration
 

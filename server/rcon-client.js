@@ -3,7 +3,41 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
+/**
+ * RCON Client for Minecraft Server Communication
+ *
+ * Manages RCON (Remote Console) connections to a Minecraft server, providing
+ * command execution, automatic reconnection, and queue management.
+ *
+ * Features:
+ * - Automatic connection and reconnection with exponential backoff
+ * - Command queue with configurable delay to prevent server overload
+ * - Event-driven architecture for connection state changes
+ * - Error handling and graceful degradation
+ *
+ * @class RconClient
+ * @example
+ * const { rconClient } = require('./rcon-client');
+ *
+ * // Send a command
+ * const result = await rconClient.sendCommand('say Hello, world!');
+ * console.log(result.response);
+ *
+ * // Listen for events
+ * rconClient.on('connected', () => {
+ *   console.log('RCON connected');
+ * });
+ */
 class RconClient {
+  /**
+   * Initialize RCON client with configuration from environment variables
+   *
+   * Environment variables:
+   * - RCON_HOST: Server hostname (default: 'localhost')
+   * - RCON_PORT: RCON port (default: 25575)
+   * - RCON_PASSWORD: RCON password (required)
+   * - COMMAND_QUEUE_DELAY: Delay between commands in ms (default: 100)
+   */
   constructor() {
     this.client = null;
     this.connected = false;

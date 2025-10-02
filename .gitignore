@@ -1,44 +1,204 @@
+# ============================================
+# CraftBot MCP - Git Ignore Configuration
+# ============================================
+
+# ----------------
 # Dependencies
+# ----------------
 node_modules/
 /.pnp
 .pnp.js
 
-# Testing
+# ----------------
+# Testing & Coverage
+# ----------------
 /coverage
+/test-results
+*.test.log
 
-# Production
+# ----------------
+# Production Builds
+# ----------------
 /build
 /dist
 
-# Environment variables
+# ----------------
+# Environment Variables (CRITICAL - Never commit!)
+# ----------------
 .env
 .env.local
 .env.development.local
 .env.test.local
 .env.production.local
+.env.backup
 
-# Logs
+# ----------------
+# Logs (All log files excluded)
+# ----------------
+*.log
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
+server.log
+ollama-log.txt
 
-# Editor directories and files
+# ----------------
+# Minecraft Server Files (Exclude large files, keep configs)
+# ----------------
+# Server JAR files (large, can be re-downloaded)
+server.jar
+server*.jar
+fabric-installer*.jar
+fabric-server-launch.jar
+
+# World data (can be huge)
+minecraft-server/world/
+minecraft-server/world_nether/
+minecraft-server/world_the_end/
+
+# Server logs (generated at runtime)
+minecraft-server/logs/
+minecraft-server/*.log
+
+# Server cache and runtime files
+minecraft-server/cache/
+minecraft-server/crash-reports/
+minecraft-server/debug/
+minecraft-server/usercache.json
+minecraft-server/banned-*.json
+minecraft-server/ops.json
+minecraft-server/whitelist.json
+
+# Libraries (can be re-downloaded)
+minecraft-server/libraries/
+libraries/
+
+# Keep server configuration templates
+!minecraft-server/server.properties.example
+!minecraft-server/eula.txt.example
+
+# ----------------
+# Fabric Mod Files
+# ----------------
+# Compiled mod JARs (exclude large files, source is in repo)
+mods/*.jar
+!mods/fabric-api*.jar
+# Note: Keep Fabric API as it's essential and smaller
+
+# Mod development files
+*.class
+*.jar.tmp
+mods/cache/
+
+# ----------------
+# OS-specific Files
+# ----------------
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+Desktop.ini
+
+# ----------------
+# Editor & IDE Files
+# ----------------
 .vscode/*
 !.vscode/extensions.json
-.idea
-.DS_Store
-*.suo
-*.ntvs*
-*.njsproj
-*.sln
-*.sw?
+!.vscode/settings.json.example
+.idea/
+*.swp
+*.swo
+*~
+.project
+.classpath
+.settings/
+*.sublime-workspace
+*.sublime-project
+.vs/
 
-# OS
-.DS_Store
-Thumbs.db
-
-# Misc
-*.log
+# ----------------
+# Temporary Files
+# ----------------
+*.tmp
+*.temp
+*.bak
+*.backup
+*.old
 .cache
+.temp/
+
+# ----------------
+# Security & Secrets (Extra protection)
+# ----------------
+*.pem
+*.key
+*.cert
+*.p12
+secrets/
+credentials/
+.secrets
+
+# ----------------
+# Build & Compile Artifacts
+# ----------------
+*.pyc
+__pycache__/
+*.so
+*.dylib
+*.dll
+*.exe
+*.out
+*.class
+
+# ----------------
+# Package Manager Locks (Keep package-lock.json, exclude others)
+# ----------------
+yarn.lock
+pnpm-lock.yaml
+# Keep: package-lock.json (for npm)
+
+# ----------------
+# Database Files (if any added later)
+# ----------------
+*.sqlite
+*.sqlite3
+*.db
+
+# ----------------
+# Documentation Build (if using doc generators)
+# ----------------
+/docs/build/
+/docs/.docusaurus/
+/docs/node_modules/
+
+# ----------------
+# Testing & CI/CD
+# ----------------
+.nyc_output/
+.coverage/
+junit.xml
+test-report.xml
+
+# =====================================
+# WHAT'S INCLUDED (Not Ignored):
+# =====================================
+# ✓ Source code (server/, src/, tests/)
+# ✓ Configuration templates (.env.example)
+# ✓ Documentation (docs/, README.md, etc.)
+# ✓ Scripts (scripts/*.sh)
+# ✓ Package files (package.json, package-lock.json)
+# ✓ Essential configs (vite.config.js, etc.)
+# ✓ Data files (data/minecraft-commands.csv)
+# ✓ Small essential mods (Fabric API)
+#
+# ✗ Large server JARs (re-downloadable)
+# ✗ World data (user-generated)
+# ✗ Logs (runtime generated)
+# ✗ Environment files (contains passwords)
+# ✗ Node modules (re-installable)
+# =====================================
