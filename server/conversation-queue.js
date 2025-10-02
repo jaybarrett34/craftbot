@@ -146,12 +146,12 @@ class ConversationQueue extends EventEmitter {
   }
 
   // Build full context including system prompt with XML instructions
-  buildFullContext(entity, recentMessages = 10) {
+  buildFullContext(entity, recentMessages = 10, contextData = {}) {
     const context = [];
 
-    // Build full system prompt: character context + XML instructions
+    // Build full system prompt: character context + XML instructions + player/AI list
     // This supports both new (characterContext) and old (systemPrompt) formats
-    const fullSystemPrompt = xmlInstructionsBuilder.buildFullSystemPrompt(entity);
+    const fullSystemPrompt = xmlInstructionsBuilder.buildFullSystemPrompt(entity, contextData);
 
     context.push({
       role: 'system',

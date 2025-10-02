@@ -48,9 +48,9 @@ class ChatBubbleManager {
       // Calculate position above entity (2 blocks up)
       const bubbleY = position.y + 2;
 
-      // Summon text_display entity - using plain string format for 1.21.9
-      // Format: text:'"message"' - just displays the plain text
-      const summonCommand = `summon text_display ${position.x} ${bubbleY} ${position.z} {Tags:["chat_bubble","${bubbleTag}"],text:'"${escapedMessage}"',billboard:"center",see_through:1b,background:0,line_width:200}`;
+      // Summon text_display entity - using JSON text component format for Minecraft 1.21.9
+      // Minecraft requires proper JSON text component wrapped in single quotes
+      const summonCommand = `summon text_display ${position.x} ${bubbleY} ${position.z} {Tags:["chat_bubble","${bubbleTag}"],text:'{"text":"${escapedMessage}"}',billboard:"center",see_through:1b,background:0,line_width:200}`;
       
       const result = await rconClient.sendCommand(summonCommand);
 

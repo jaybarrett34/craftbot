@@ -29,7 +29,12 @@
       "Bash(lsof:*)",
       "Bash(xargs kill:*)",
       "Bash(npm test:*)",
-      "Bash(node:*)"
+      "Bash(node:*)",
+      "Bash(npm audit:*)",
+      "Bash(./scripts/start-all.sh:*)",
+      "Bash(./scripts/start-minecraft.sh:*)",
+      "WebFetch(domain:minecraft.wiki)",
+      "Bash(npm run build:*)"
     ],
     "deny": [],
     "ask": []

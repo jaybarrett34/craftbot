@@ -136,7 +136,7 @@ USE @p for nearest player, @a for all players, @s for self`;
    * @param {Object} entity - The entity configuration
    * @returns {string} - The complete system prompt
    */
-  buildFullSystemPrompt(entity) {
+  buildFullSystemPrompt(entity, contextData = {}) {
     // Get character context (user-editable personality)
     let characterContext = '';
 
@@ -151,11 +151,23 @@ USE @p for nearest player, @a for all players, @s for self`;
       characterContext = `You are ${entity.name}, an AI entity in a Minecraft world.`;
     }
 
+    // Add context about other entities and players
+    let contextSection = '';
+    if (contextData.players && contextData.players.length > 0) {
+      contextSection += `\nCURRENT PLAYERS ONLINE: ${contextData.players.join(', ')}`;
+    }
+    if (contextData.aiEntities && contextData.aiEntities.length > 0) {
+      const otherAIs = contextData.aiEntities.filter(name => name !== entity.name);
+      if (otherAIs.length > 0) {
+        contextSection += `\nOTHER AI ENTITIES: ${otherAIs.join(', ')} (you can talk to them if respondToAI is enabled)`;
+      }
+    }
+
     // Get XML instructions (auto-generated)
     const xmlInstructions = this.buildInstructions(entity);
 
     // Combine them
-    return `${characterContext}\n\n${xmlInstructions}`;
+    return `${characterContext}${contextSection}\n\n${xmlInstructions}`;
   }
 
   /**

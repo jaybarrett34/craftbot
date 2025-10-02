@@ -18,10 +18,11 @@ export const defaultConfig = {
         maxProximity: null,
         chatFilters: {
           respondToPlayers: true,      // Respond to player messages
-          respondToAI: false,           // Respond to other AI entities
+          respondToAI: true,            // Respond to other AI entities (ENABLED for AI-to-AI communication)
           requiresMention: false,       // Only respond if entity name mentioned
           proximityRequired: false,     // Already exists at parent level, kept for backward compatibility
-          maxProximity: null            // Already exists at parent level, kept for backward compatibility
+          maxProximity: null,           // Already exists at parent level, kept for backward compatibility
+          responseProbability: 1.0      // 0.0 = never, 0.25 = urgent only, 0.5 = moderate, 0.75 = frequent, 1.0 = always
         }
       },
       personality: {
@@ -36,8 +37,9 @@ export const defaultConfig = {
       },
       appearance: {
         spawnCommand: null, // console doesn't spawn
-        chatBubble: false,
-        usesServerChat: true
+        chatBubble: false,  // Console uses server chat, not bubbles
+        usesServerChat: true, // Default: use server chat (not bubbles)
+        chatColor: "gold"   // Minecraft color code for chat messages
       },
       mcpTools: {
         minecraft_send_message: true,

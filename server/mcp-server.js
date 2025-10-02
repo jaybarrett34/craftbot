@@ -314,7 +314,10 @@ class MCPServer {
   setupEventHandlers() {
     // Chat monitor events
     chatMonitor.on('chat', async (chatMessage) => {
-      this.addLog('chat', `<${chatMessage.player}> ${chatMessage.message}`);
+      // Only log if it's NOT from the feedback loop (feedback already logged at line 569)
+      if (!chatMessage.sourceEntityId) {
+        this.addLog('chat', `<${chatMessage.player}> ${chatMessage.message}`);
+      }
       this.broadcastToClients('chat', chatMessage);
 
       // Check which entities should respond
@@ -431,8 +434,12 @@ class MCPServer {
       { player: message.player }
     );
 
-    // Build context
-    const context = conversationQueue.buildFullContext(entity, 20);
+    // Build context with player/AI awareness
+    const contextData = {
+      players: this.players, // List of online players
+      aiEntities: this.entities.filter(e => e.enabled && e.llm?.enabled).map(e => e.name) // List of enabled AI entities
+    };
+    const context = conversationQueue.buildFullContext(entity, 20, contextData);
 
     // Add current state information if entity has access
     if (entity.knowledge?.canAccessPlayerState || entity.knowledge?.canAccessWorldState) {
@@ -486,16 +493,15 @@ class MCPServer {
         let actualCommand = cmd.command.replace(/^\//, '');
 
         // Convert /say commands to tellraw to avoid [Rcon] prefix
+        // IMPORTANT: This prevents entities from using /say to mimic other players
         if (actualCommand.startsWith('say ')) {
           const message = actualCommand.substring(4).trim(); // Remove 'say ' prefix
           const target = message.match(/^(@[aprs]|@[aprs]\[[^\]]+\]|\w+)/)?.[0] || '@a';
           const text = message.substring(target.length).trim();
 
-          if (entity.type === 'console') {
-            actualCommand = `tellraw ${target} {"text":"<${entity.name}> ${llmParser.escapeMinecraftText(text)}","color":"gold"}`;
-          } else {
-            actualCommand = `tellraw ${target} {"text":"[AI] <${entity.name}> ${llmParser.escapeMinecraftText(text)}","color":"aqua"}`;
-          }
+          // Get chat color from entity appearance config (default: gold for console, aqua for others)
+          const chatColor = entity.appearance?.chatColor || (entity.type === 'console' ? 'gold' : 'aqua');
+          actualCommand = `tellraw ${target} {"text":"<${entity.name}> ${llmParser.escapeMinecraftText(text)}","color":"${chatColor}"}`;
         }
 
         console.log(`[MCPServer] Executing validated command: ${actualCommand}`);
@@ -512,10 +518,12 @@ class MCPServer {
     // action=0 means entity wants to think/observe silently
     // action=1 (default) means entity wants to speak
     const shouldSpeak = parsed.action !== 0;
-    
-    if (!shouldSpeak && parsed.chat.length > 0) {
-      console.log(`[MCPServer] Entity "${entity.name}" chose not to speak (action=0), suppressing ${parsed.chat.length} chat message(s)`);
-      this.addLog('system', `${entity.name} observed silently`);
+
+    if (!shouldSpeak) {
+      console.log(`[MCPServer] 🤐 Entity "${entity.name}" chose SILENCE (action=0) - ${parsed.chat.length} chat message(s) suppressed, ${parsed.commands.length} commands still executed`);
+      this.addLog('system', `${entity.name} observed silently (action=0)`);
+    } else if (parsed.chat.length > 0 || parsed.commands.length > 0) {
+      console.log(`[MCPServer] 💬 Entity "${entity.name}" chose to SPEAK (action=${parsed.action}) - ${parsed.chat.length} chat, ${parsed.commands.length} commands`);
     }
 
     for (const chatMsg of parsed.chat) {
@@ -543,17 +551,11 @@ class MCPServer {
           const isFirstChunk = i === 0;
           const isMultipart = messageChunks.length > 1;
           
-          let formattedCommand;
-          if (entity.type === 'console') {
-            // Console messages with proper name display (no [AI] tag, different color)
-            const prefix = isFirstChunk ? `<${entity.name}> ` : '  '; // Indent continuation lines
-            formattedCommand = `tellraw @a {"text":"${prefix}${llmParser.escapeMinecraftText(chunk)}","color":"gold"}`;
-          } else {
-            // NPC/AI entity messages with [AI] tag
-            const prefix = isFirstChunk ? `[AI] <${entity.name}> ` : '  '; // Indent continuation lines
-            formattedCommand = `tellraw @a {"text":"${prefix}${llmParser.escapeMinecraftText(chunk)}","color":"aqua"}`;
-          }
-          
+          // Get chat color from entity appearance config (default: gold for console, aqua for others)
+          const chatColor = entity.appearance?.chatColor || (entity.type === 'console' ? 'gold' : 'aqua');
+          const prefix = isFirstChunk ? `<${entity.name}> ` : '  '; // Indent continuation lines
+          const formattedCommand = `tellraw @a {"text":"${prefix}${llmParser.escapeMinecraftText(chunk)}","color":"${chatColor}"}`;
+
           const result = await rconClient.sendCommand(formattedCommand);
           
           // Small delay between chunks for readability
@@ -577,10 +579,10 @@ class MCPServer {
       // This allows other AI entities to hear it without waiting for log file polling
       const feedbackMessage = {
         type: 'chat',
-        player: `[AI] ${entity.name}`,
+        player: entity.name, // Just entity name, no [AI] prefix (chat-monitor will detect it)
         message: chatMsg,
         timestamp: new Date().toISOString(),
-        raw: `<[AI] ${entity.name}> ${chatMsg}`,
+        raw: `<${entity.name}> ${chatMsg}`,
         isAI: true,
         sourceEntityId: entity.id // Track source to prevent self-response
       };

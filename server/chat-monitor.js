@@ -394,7 +394,7 @@ class ChatMonitor extends EventEmitter {
 
     // CRITICAL: Don't respond to own messages (prevent feedback loop)
     if (chatMessage.sourceEntityId && chatMessage.sourceEntityId === entity.id) {
-      console.log(`[ChatMonitor] Entity "${entity.name}" ignoring own message`);
+      console.log(`[ChatMonitor] 🔇 Entity "${entity.name}" (${entity.id}) ignoring own message`);
       return false;
     }
 
@@ -408,13 +408,13 @@ class ChatMonitor extends EventEmitter {
     // Check chat filters
     // If message is from AI and entity doesn't respond to AI
     if (chatMessage.isAI && !chatFilters.respondToAI) {
-      console.log(`[ChatMonitor] Entity "${entity.name}" not responding - respondToAI is false`);
+      console.log(`[ChatMonitor] ❌ Entity "${entity.name}" (${entity.id}) not responding to AI "${chatMessage.player}" - respondToAI is false`);
       return false;
     }
 
     // If message is from player and entity doesn't respond to players
     if (!chatMessage.isAI && !chatFilters.respondToPlayers) {
-      console.log(`[ChatMonitor] Entity "${entity.name}" not responding - respondToPlayers is false`);
+      console.log(`[ChatMonitor] ❌ Entity "${entity.name}" (${entity.id}) not responding to player "${chatMessage.player}" - respondToPlayers is false`);
       return false;
     }
 
@@ -427,16 +427,20 @@ class ChatMonitor extends EventEmitter {
     }
 
     // Check if entity requires proximity (use chatFilters first, then fall back to parent level)
-    const proximityRequired = chatFilters.proximityRequired !== undefined
-      ? chatFilters.proximityRequired
-      : entity.knowledge?.proximityRequired;
+    // IMPORTANT: Console entities (type='console') ignore proximity requirements
+    const isConsoleEntity = entity.type === 'console';
+    const proximityRequired = isConsoleEntity ? false : (
+      chatFilters.proximityRequired !== undefined
+        ? chatFilters.proximityRequired
+        : entity.knowledge?.proximityRequired
+    );
 
-    if (proximityRequired) {
+    if (proximityRequired && !isConsoleEntity) {
       const maxProximity = chatFilters.maxProximity || entity.knowledge?.maxProximity || 10;
 
       // Get entity position from position tracker (dynamically updated)
       const entityPosition = positionTracker.getPosition(entity.id);
-      
+
       // If entity has a position, check proximity
       if (entityPosition) {
         const isNear = await this.checkProximity(
@@ -446,19 +450,92 @@ class ChatMonitor extends EventEmitter {
         );
 
         if (!isNear) {
-          console.log(`[ChatMonitor] Entity "${entity.name}" too far from ${chatMessage.player} (max: ${maxProximity} blocks)`);
+          console.log(`[ChatMonitor] ❌ Entity "${entity.name}" (${entity.id}) too far from ${chatMessage.player} (max: ${maxProximity} blocks)`);
           return false;
         }
       } else {
         // No position available - DENY response (proximity required but no position tracked)
-        console.log(`[ChatMonitor] Entity "${entity.name}" requires proximity but has no position tracked, denying response`);
+        console.log(`[ChatMonitor] ❌ Entity "${entity.name}" (${entity.id}) requires proximity but has no position tracked`);
         console.log(`[ChatMonitor] → Ensure entity has appearance.entityTag and is registered with position tracker`);
         return false;
       }
     }
 
-    // All filters passed
-    return true;
+    // Check response probability (0.0 to 1.0)
+    const responseProbability = chatFilters.responseProbability !== undefined
+      ? chatFilters.responseProbability
+      : 1.0; // Default to always respond
+
+    // 0.0 = never respond (effectively disabled)
+    if (responseProbability <= 0.0) {
+      console.log(`[ChatMonitor] ❌ Entity "${entity.name}" (${entity.id}) not responding - responseProbability is 0`);
+      return false;
+    }
+
+    // 1.0 = always respond (skip probability check)
+    if (responseProbability >= 1.0) {
+      console.log(`[ChatMonitor] ✅ Entity "${entity.name}" (${entity.id}) WILL respond to "${chatMessage.player}" (isAI: ${chatMessage.isAI}) - probability: 100%`);
+      return true;
+    }
+
+    // For values between 0.0 and 1.0, use message urgency heuristic
+    const urgencyScore = this.calculateMessageUrgency(chatMessage, entity);
+
+    // Adjust probability based on urgency
+    // urgencyScore: 0-1 where 1 is most urgent
+    // finalProbability = responseProbability * (0.3 + 0.7 * urgencyScore)
+    // This means even at low responseProbability, urgent messages have better chance
+    const finalProbability = responseProbability * (0.3 + 0.7 * urgencyScore);
+    const randomValue = Math.random();
+
+    const willRespond = randomValue < finalProbability;
+
+    if (willRespond) {
+      console.log(`[ChatMonitor] ✅ Entity "${entity.name}" (${entity.id}) WILL respond to "${chatMessage.player}" (isAI: ${chatMessage.isAI}) - probability: ${(finalProbability * 100).toFixed(0)}% (urgency: ${(urgencyScore * 100).toFixed(0)}%, roll: ${(randomValue * 100).toFixed(0)}%)`);
+    } else {
+      console.log(`[ChatMonitor] 🎲 Entity "${entity.name}" (${entity.id}) SKIPPED response due to probability - target: ${(finalProbability * 100).toFixed(0)}%, roll: ${(randomValue * 100).toFixed(0)}%`);
+    }
+
+    return willRespond;
+  }
+
+  /**
+   * Calculate message urgency score (0-1) based on content and context
+   * Higher score = more likely to respond even at low probability settings
+   */
+  calculateMessageUrgency(chatMessage, entity) {
+    let urgency = 0.5; // Base urgency
+    const message = chatMessage.message.toLowerCase();
+
+    // Check for mentions of entity name
+    if (message.includes(entity.name.toLowerCase())) {
+      urgency += 0.3;
+    }
+
+    // Check for question marks (indicates question)
+    if (message.includes('?')) {
+      urgency += 0.15;
+    }
+
+    // Check for exclamation marks (indicates urgency/excitement)
+    if (message.includes('!')) {
+      urgency += 0.1;
+    }
+
+    // Check for urgent keywords
+    const urgentKeywords = ['help', 'urgent', 'emergency', 'please', 'now', 'quick', 'asap', 'need'];
+    if (urgentKeywords.some(keyword => message.includes(keyword))) {
+      urgency += 0.2;
+    }
+
+    // Check for greeting keywords (higher urgency for greetings)
+    const greetingKeywords = ['hello', 'hi', 'hey', 'greetings', 'howdy'];
+    if (greetingKeywords.some(keyword => message.includes(keyword))) {
+      urgency += 0.15;
+    }
+
+    // Cap at 1.0
+    return Math.min(urgency, 1.0);
   }
 
   getStats() {

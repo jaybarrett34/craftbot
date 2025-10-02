@@ -5,6 +5,48 @@ import { permissionLevels, playerStateFields, worldStateFields } from '../config
 import { api } from '../services/api';
 import './EntityConfigSidebar.css';
 
+// Minecraft color name to hex mapping
+const MINECRAFT_COLORS = {
+  'black': '#000000',
+  'dark_blue': '#0000AA',
+  'dark_green': '#00AA00',
+  'dark_aqua': '#00AAAA',
+  'dark_red': '#AA0000',
+  'dark_purple': '#AA00AA',
+  'gold': '#FFAA00',
+  'gray': '#AAAAAA',
+  'dark_gray': '#555555',
+  'blue': '#5555FF',
+  'green': '#55FF55',
+  'aqua': '#55FFFF',
+  'red': '#FF5555',
+  'light_purple': '#FF55FF',
+  'yellow': '#FFFF55',
+  'white': '#FFFFFF'
+};
+
+// Helper to convert hex to closest Minecraft color name
+const hexToMinecraftColor = (hex) => {
+  if (!hex || !hex.startsWith('#')) return 'gold';
+
+  // Check if hex exactly matches a Minecraft color
+  for (const [name, colorHex] of Object.entries(MINECRAFT_COLORS)) {
+    if (colorHex.toLowerCase() === hex.toLowerCase()) {
+      return name;
+    }
+  }
+
+  // Return hex as-is if no exact match
+  return hex;
+};
+
+// Helper to get hex from Minecraft color name or hex
+const getHexColor = (color) => {
+  if (!color) return MINECRAFT_COLORS.gold;
+  if (color.startsWith('#')) return color;
+  return MINECRAFT_COLORS[color] || MINECRAFT_COLORS.gold;
+};
+
 export default function EntityConfigSidebar({ config, onConfigChange }) {
   const [viewMode, setViewMode] = useState('pretty'); // 'pretty' or 'json'
   const [selectedEntityId, setSelectedEntityId] = useState(config.entities[0]?.id || null);
@@ -101,7 +143,8 @@ export default function EntityConfigSidebar({ config, onConfigChange }) {
       appearance: {
         spawnCommand: null,
         chatBubble: true,
-        usesServerChat: false
+        usesServerChat: false,
+        chatColor: "aqua"
       },
       mcpTools: {
         minecraft_send_message: false,
@@ -465,6 +508,97 @@ export default function EntityConfigSidebar({ config, onConfigChange }) {
                         Only respond when entity name is mentioned in the message
                       </small>
                     </div>
+
+                    <div className="form-group">
+                      <label>Response Probability</label>
+                      <div className="response-probability-container">
+                        <input
+                          type="range"
+                          min="0"
+                          max="1"
+                          step="0.01"
+                          value={selectedEntity.knowledge.chatFilters?.responseProbability ?? 1.0}
+                          onChange={(e) => handleNestedFieldChange('knowledge.chatFilters.responseProbability', parseFloat(e.target.value))}
+                          className="response-probability-slider"
+                          style={{
+                            background: `linear-gradient(to right,
+                              ${(() => {
+                                const val = selectedEntity.knowledge.chatFilters?.responseProbability ?? 1.0;
+                                if (val === 0) return '#666';
+                                if (val <= 0.25) return '#ff6b35';
+                                if (val <= 0.5) return '#ffd700';
+                                if (val <= 0.75) return '#90ee90';
+                                return '#00ff00';
+                              })()
+                              } ${(selectedEntity.knowledge.chatFilters?.responseProbability ?? 1.0) * 100}%,
+                              rgba(255, 255, 255, 0.1) ${(selectedEntity.knowledge.chatFilters?.responseProbability ?? 1.0) * 100}%)`
+                          }}
+                        />
+                        <span
+                          className="response-probability-value"
+                          style={{
+                            color: (() => {
+                              const val = selectedEntity.knowledge.chatFilters?.responseProbability ?? 1.0;
+                              if (val === 0) return '#666';
+                              if (val <= 0.25) return '#ff6b35';
+                              if (val <= 0.5) return '#ffd700';
+                              if (val <= 0.75) return '#90ee90';
+                              return '#00ff00';
+                            })()
+                          }}
+                        >
+                          {(() => {
+                            const val = selectedEntity.knowledge.chatFilters?.responseProbability ?? 1.0;
+                            if (val === 0) return 'Never (0%)';
+                            if (val === 0.25) return 'Urgent Only (25%)';
+                            if (val === 0.5) return 'Moderate (50%)';
+                            if (val === 0.75) return 'Frequent (75%)';
+                            if (val === 1.0) return 'Always (100%)';
+                            return `${Math.round(val * 100)}%`;
+                          })()}
+                        </span>
+                      </div>
+                      <div className="response-probability-presets">
+                        <button
+                          className="preset-btn"
+                          onClick={() => handleNestedFieldChange('knowledge.chatFilters.responseProbability', 0.0)}
+                          style={{ color: '#666' }}
+                        >
+                          Never
+                        </button>
+                        <button
+                          className="preset-btn"
+                          onClick={() => handleNestedFieldChange('knowledge.chatFilters.responseProbability', 0.25)}
+                          style={{ color: '#ff6b35' }}
+                        >
+                          Urgent
+                        </button>
+                        <button
+                          className="preset-btn"
+                          onClick={() => handleNestedFieldChange('knowledge.chatFilters.responseProbability', 0.5)}
+                          style={{ color: '#ffd700' }}
+                        >
+                          Moderate
+                        </button>
+                        <button
+                          className="preset-btn"
+                          onClick={() => handleNestedFieldChange('knowledge.chatFilters.responseProbability', 0.75)}
+                          style={{ color: '#90ee90' }}
+                        >
+                          Frequent
+                        </button>
+                        <button
+                          className="preset-btn"
+                          onClick={() => handleNestedFieldChange('knowledge.chatFilters.responseProbability', 1.0)}
+                          style={{ color: '#00ff00' }}
+                        >
+                          Always
+                        </button>
+                      </div>
+                      <small className="help-text">
+                        Controls how often the entity responds to messages. Uses urgency heuristic: messages with urgency keywords (help, urgent, emergency, etc.) or questions override this probability and always trigger a response.
+                      </small>
+                    </div>
                   </div>
 
                   <div className="form-section">
@@ -553,6 +687,38 @@ export default function EntityConfigSidebar({ config, onConfigChange }) {
                       </label>
                       <small className="help-text">
                         Send messages to server chat (visible to all players)
+                      </small>
+                    </div>
+
+                    <div className="form-group">
+                      <label>Chat Color</label>
+                      <div className="color-picker-container">
+                        <input
+                          type="color"
+                          className="color-picker-input"
+                          value={getHexColor(selectedEntity.appearance.chatColor || (selectedEntity.type === 'console' ? 'gold' : 'aqua'))}
+                          onChange={(e) => {
+                            const hex = e.target.value;
+                            const mcColor = hexToMinecraftColor(hex);
+                            handleNestedFieldChange('appearance.chatColor', mcColor);
+                          }}
+                        />
+                        <input
+                          type="text"
+                          className="color-text-input"
+                          placeholder="gold, aqua, #FF5733"
+                          value={selectedEntity.appearance.chatColor || (selectedEntity.type === 'console' ? 'gold' : 'aqua')}
+                          onChange={(e) => handleNestedFieldChange('appearance.chatColor', e.target.value)}
+                        />
+                        <div
+                          className="color-preview"
+                          style={{
+                            backgroundColor: getHexColor(selectedEntity.appearance.chatColor || (selectedEntity.type === 'console' ? 'gold' : 'aqua'))
+                          }}
+                        />
+                      </div>
+                      <small className="help-text">
+                        Minecraft color name (gold, aqua, red, etc.) or hex code (#FF5733)
                       </small>
                     </div>
                   </div>

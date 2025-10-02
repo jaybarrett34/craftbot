@@ -280,10 +280,10 @@ class LLMParser {
 
     // Add chat messages with entity tag
     for (const message of parsed.chat) {
-      // Prefix with [AI] tag to identify AI messages
+      // No [AI] prefix to avoid duplication (chat monitor detects AI via other means)
       responses.push({
         type: 'chat',
-        content: `tellraw @a {"text":"[AI] <${entityName}> ${this.escapeMinecraftText(message)}","color":"aqua"}`
+        content: `tellraw @a {"text":"<${entityName}> ${this.escapeMinecraftText(message)}","color":"aqua"}`
       });
     }
 
